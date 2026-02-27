@@ -17,24 +17,26 @@ import com.javacorrige.util.reflection.element.ElementFilter.ElementType;
 public class PdfClassCorrection {
 
     public static void addClassCorrection(Document document, ClassCorrection classCorrection) {
+
         // Adiciona o título da classe
-        addTitle(document, "Classe `" + classCorrection.getTemplate().getSimpleName() + "`(" + String.format("%.2f", classCorrection.getObtainedGrade()) + "/" + String.format("%.2f", classCorrection.getGrade()) + ")");
+        addTitle(document,
+                "Classe `" + classCorrection.getTemplate().getSimpleName() + "`("
+                        + String.format("%.2f", classCorrection.getObtainedGrade()) + "/"
+                        + String.format("%.2f", classCorrection.getGrade()) + ")");
 
         // Adiciona os elementos ausentes
         addElementsByType(
-            document,
-            classCorrection.getMissingElements(),
-            "Elementos ausentes:",
-            ColorConstants.RED
-        );
+                document,
+                classCorrection.getMissingElements(),
+                "Elementos ausentes:",
+                ColorConstants.RED);
 
         // Adiciona os elementos extras
         addElementsByType(
-            document,
-            classCorrection.getExtraElements(),
-            "Elementos extras:",
-            ColorConstants.CYAN
-        );
+                document,
+                classCorrection.getExtraElements(),
+                "Elementos extras:",
+                ColorConstants.CYAN);
 
         // Adiciona os elementos corrigidos
         PdfElement.addElementSection(document, classCorrection.getCorrectedElements());
@@ -53,9 +55,9 @@ public class PdfClassCorrection {
             Document document,
             List<SpecificationElement<?>> elements,
             String headerText,
-            com.itextpdf.kernel.colors.Color color
-    ) {
-        if (elements.isEmpty()) return;
+            com.itextpdf.kernel.colors.Color color) {
+        if (elements.isEmpty())
+            return;
 
         // Agrupa os elementos por tipo usando ElementFilter
         Map<ElementType, List<SpecificationElement<?>>> groupedElements = new EnumMap<>(ElementType.class);
