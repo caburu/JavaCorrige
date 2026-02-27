@@ -3,6 +3,7 @@ package com.javacorrige.service.pdf;
 import java.util.List;
 import java.util.function.Function;
 import com.itextpdf.layout.Document;
+
 import com.itextpdf.layout.element.Paragraph;
 import com.javacorrige.model.result.correction.SpecificationElement;
 import com.javacorrige.util.reflection.element.ElementFilter;
@@ -38,22 +39,26 @@ public class PdfElement {
         }
 
         // Adiciona o título da seção (diferente para cada tipo de elemento)
-        if(!constructors.isEmpty()){
-            addSectionTitle(document, "Construtores " + "(" + String.format("%.2f", constructorObtainedGrade) + "/" + String.format("%.2f", constructorGrade) + "):", constructors);
+        if (!constructors.isEmpty() && constructorGrade > 0) {
+            addSectionTitle(document, "Construtores " + "(" + String.format("%.2f", constructorObtainedGrade) + "/"
+                    + String.format("%.2f", constructorGrade) + "):", constructors);
             addTableForConstructors(document, constructors);
         }
-        if(!fields.isEmpty()){
-            addSectionTitle(document, "Atributos " + "(" + String.format("%.2f", fieldObtainedGrade) + "/" + String.format("%.2f", fieldGrade) + "):", fields);
+        if (!fields.isEmpty() && fieldGrade > 0) {
+            addSectionTitle(document, "Atributos " + "(" + String.format("%.2f", fieldObtainedGrade) + "/"
+                    + String.format("%.2f", fieldGrade) + "):", fields);
             addTableForFields(document, fields);
         }
-        if(!methods.isEmpty()){
-            addSectionTitle(document, "Métodos " + "(" + String.format("%.2f", methodObtainedGrade) + "/" + String.format("%.2f", methodGrade) + "):", methods);
+        if (!methods.isEmpty() && methodGrade > 0) {
+            addSectionTitle(document, "Métodos " + "(" + String.format("%.2f", methodObtainedGrade) + "/"
+                    + String.format("%.2f", methodGrade) + "):", methods);
             addTableForMethods(document, methods);
         }
     }
 
     // Método auxiliar para adicionar o título da seção
-    private static void addSectionTitle(Document document, String sectionTitle, List<SpecificationElement<?>> elements) {
+    private static void addSectionTitle(Document document, String sectionTitle,
+            List<SpecificationElement<?>> elements) {
         Paragraph sectionTitleParagraph = new Paragraph(sectionTitle)
                 .setBold()
                 .setFontSize(14)
@@ -67,12 +72,12 @@ public class PdfElement {
 
         // Funções que extraem os valores para a tabela
         List<Function<SpecificationElement<?>, String>> valueExtractors = List.of(
-            element -> element.templateString(),
-            element -> element.checkVisibility() ? "V" : "X", // Visibilidade
-            element -> element.checkModifiers() ? "V" : "X",
-            element -> element.checkParameters() ? "V" : "X", // Parâmetros
-            element -> String.format("%.2f", element.getObtainedGrade()) + " / " + String.format("%.2f", element.getGrade())
-        );
+                element -> element.templateString(),
+                element -> element.checkVisibility() ? "V" : "X", // Visibilidade
+                element -> element.checkModifiers() ? "V" : "X",
+                element -> element.checkParameters() ? "V" : "X", // Parâmetros
+                element -> String.format("%.2f", element.getObtainedGrade()) + " / "
+                        + String.format("%.2f", element.getGrade()));
 
         // Chama o método da classe PdfTableService para gerar a tabela
         PdfTableService.addTable(document, headers, elements, valueExtractors);
@@ -84,12 +89,12 @@ public class PdfElement {
 
         // Funções que extraem os valores para a tabela
         List<Function<SpecificationElement<?>, String>> valueExtractors = List.of(
-            element -> element.templateString(),
-            element -> element.checkVisibility() ? "V" : "X", // Visibilidade
-            element -> element.checkModifiers() ? "V" : "X", // Modificador
-            element -> element.checkType() ? "V" : "X", // Tipo
-            element -> String.format("%.2f", element.getObtainedGrade()) + " / " + String.format("%.2f", element.getGrade())
-        );
+                element -> element.templateString(),
+                element -> element.checkVisibility() ? "V" : "X", // Visibilidade
+                element -> element.checkModifiers() ? "V" : "X", // Modificador
+                element -> element.checkType() ? "V" : "X", // Tipo
+                element -> String.format("%.2f", element.getObtainedGrade()) + " / "
+                        + String.format("%.2f", element.getGrade()));
 
         // Chama o método da classe PdfTableService para gerar a tabela
         PdfTableService.addTable(document, headers, elements, valueExtractors);
@@ -97,19 +102,21 @@ public class PdfElement {
 
     // Adiciona tabela para os métodos
     private static void addTableForMethods(Document document, List<SpecificationElement<?>> elements) {
-        List<String> headers = List.of("Metodo", "Visibilidade", "Modificador", "Retorno", "Parâmetros", "Teste", "Nota");
-        // List<String> headers = List.of("Metodo", "Visibilidade", "Modificador", "Retorno", "Parâmetros", "Nota");
+        List<String> headers = List.of("Metodo", "Visibilidade", "Modificador", "Retorno", "Parâmetros", "Teste",
+                "Nota");
+        // List<String> headers = List.of("Metodo", "Visibilidade", "Modificador",
+        // "Retorno", "Parâmetros", "Nota");
 
         // Funções que extraem os valores para a tabela
         List<Function<SpecificationElement<?>, String>> valueExtractors = List.of(
-            element -> element.templateString(),
-            element -> element.checkVisibility() ? "V" : "X", // Visibilidade
-            element -> element.checkModifiers() ? "V" : "X", // Modificador
-            element -> element.checkReturnType() ? "V" : "X", // Retorno
-            element -> element.checkParameters() ? "V" : "X", // Parâmetros
-            element -> element.checkTest() ? "V" : "X",
-            element -> String.format("%.2f", element.getObtainedGrade()) + " / " + String.format("%.2f", element.getGrade())
-        );
+                element -> element.templateString(),
+                element -> element.checkVisibility() ? "V" : "X", // Visibilidade
+                element -> element.checkModifiers() ? "V" : "X", // Modificador
+                element -> element.checkReturnType() ? "V" : "X", // Retorno
+                element -> element.checkParameters() ? "V" : "X", // Parâmetros
+                element -> element.checkTest() ? "V" : "X",
+                element -> String.format("%.2f", element.getObtainedGrade()) + " / "
+                        + String.format("%.2f", element.getGrade()));
 
         // Chama o método da classe PdfTableService para gerar a tabela
         PdfTableService.addTable(document, headers, elements, valueExtractors);
