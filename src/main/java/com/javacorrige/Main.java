@@ -29,6 +29,7 @@ public class Main {
 
                 System.out.println("Software executado com sucesso!");
             } catch (Exception ex) {
+                System.out.println("Erro ao carregar programa via linha de comando.");
                 GraphicalInterface graphicalInterface = new GraphicalInterface();
                 graphicalInterface.show();
             }

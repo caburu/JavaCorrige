@@ -14,7 +14,8 @@ public class ElementFilter {
         CONSTRUCTOR, FIELD, METHOD
     }
 
-    public static List<SpecificationElement<?>> getElementsByType(List<SpecificationElement<?>> elements, ElementType type) {
+    public static List<SpecificationElement<?>> getElementsByType(List<SpecificationElement<?>> elements,
+            ElementType type) {
         List<SpecificationElement<?>> selectedElements = new ArrayList<>();
 
         for (SpecificationElement<?> element : elements) {
@@ -40,4 +41,3 @@ public class ElementFilter {
         return selectedElements;
     }
 }
-
