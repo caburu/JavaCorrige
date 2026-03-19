@@ -31,6 +31,7 @@ O software automatiza o processo de avaliação de exercícios práticos de POO.
 ## Preparando o Ambiente
 
 ### 1. Pasta de Gabarito
+
 - **Estrutura**:
   - A pasta raiz do gabarito deve ter o nome geral do exercício.
   - Dentro da pasta raiz, crie subpastas para cada etapa ou exercício (os nomes das subpastas devem estar organizados em ordem alfanumérica).
@@ -46,38 +47,41 @@ O software automatiza o processo de avaliação de exercícios práticos de POO.
     ```
 
 - **Anotação `Especificacao`**:
-   - Utilize a biblioteca `com.javacorrige` para definir se os atributos, construtores e métodos devem ser exatos. O nível de similaridade dos nomes
+  - Utilize a biblioteca `com.javacorrige` para definir se os atributos, construtores e métodos devem ser exatos. O nível de similaridade dos nomes
     e a penalidade na nota para cada item que faltar:
-   ```java
-   @Especificacao(atributosExatos = false, construtoresExatos = true, similaridade = 0.7, penalidade = 0.2) // construtores está presente mas penso em retirar.
-   public class Classe {
-      //Exemplo de classe anotado com Especificação
-   }
-   ```
+
+  ```java
+  @Especificacao(atributosExatos = false, construtoresExatos = true, similaridade = 0.7, penalidade = 0.2) // construtores está presente mas penso em retirar.
+  public class Classe {
+     //Exemplo de classe anotado com Especificação
+  }
+  ```
 
 - **Anotação `Testar`**:
-   - Utilize a biblioteca `com.javacorrige` para definir testes automatizados para métodos, especificando valores de entrada e, opcionalmente, o construtor utilizado.
-   ```java
-   import com.javacorrige.Testar;
+  - Utilize a biblioteca `com.javacorrige` para definir testes automatizados para métodos, especificando valores de entrada e, opcionalmente, o construtor utilizado.
 
-   public class ExemploGabarito {
-      private int soma;
+  ```java
+  import com.javacorrige.Testar;
 
-      public ExemploGabarito(int inicial) {
-         this.soma = inicial;
-      }
+  public class ExemploGabarito {
+     private int soma;
 
-      @Testar(parametros = {"5", "10"}, construtor = {"0"})
-      public int somar(int a, int b) {
-         return a + b + soma;
-      }
-   }
-   ```
+     public ExemploGabarito(int inicial) {
+        this.soma = inicial;
+     }
+
+     @Testar(parametros = {"5", "10"}, construtor = {"0"})
+     public int somar(int a, int b) {
+        return a + b + soma;
+     }
+  }
+  ```
 
 - **Baixando a Biblioteca**:
   - Faça o download da biblioteca `com.javacorrige` no seguinte link: [javacorrigelib v1.0](https://github.com/GabrielDaniAz/javacorrigelib/releases/tag/v1.0).
 
 ### 2. Pasta de Códigos dos Alunos
+
 - **Estrutura**:
   - A pasta raiz deve conter apenas subpastas com o nome de cada aluno.
   - Dentro de cada subpasta, devem estar os arquivos `.java` enviados pelo aluno.
@@ -86,6 +90,7 @@ O software automatiza o processo de avaliação de exercícios práticos de POO.
   - Caso os arquivos sejam enviados compactados, o software descompacta automaticamente e organiza a estrutura conforme necessário.
 
 ### 3. Diretório de Saída dos Relatórios
+
 - Informe o diretório onde deseja salvar os PDFs gerados. Caso o diretório não exista, ele será criado automaticamente.
 
 ---
@@ -96,13 +101,13 @@ Para executar o software, você tem duas opções:
 
 1. **Via Maven:**
    Antes de rodar o programa, é importante realizar uma compilação completa para garantir que todas as dependências estejam corretas. Execute:
-   
+
    ```bash
    mvn clean install
    ```
 
    Em seguida, rode o programa diretamente pelo Maven:
-   
+
    ```bash
    mvn exec:java
    ```
@@ -114,7 +119,6 @@ Para executar o software, você tem duas opções:
    Após gerar o arquivo `.jar` do projeto, você pode executar o software tanto no Windows quanto no Linux de forma direta pela linha de comando.
 
    ### 1. Configurar o Arquivo `.bat` (Windows) ou `.sh` (Linux)
-
    - O repositório contém um arquivo **`javacorrige.bat`** (Windows) e você pode criar um equivalente em Linux, chamado **`javacorrige.sh`**.
    - Para tornar a execução mais fácil, adicione o diretório do arquivo `.bat` ou `.sh` ao seu `PATH`.
 
@@ -128,11 +132,13 @@ Para executar o software, você tem duas opções:
    3. Salve as alterações e feche.
 
    Agora você pode rodar o programa pelo terminal com:
+
    ```cmd
    javacorrige "<diretorioGabarito>" "<diretorioAlunos>" "<diretorioPDFs>" "<passoCorrecao>"
    ```
 
    **Exemplo:**
+
    ```cmd
    javacorrige "C:\Exercicios\Gabarito" "C:\Exercicios\Alunos" "C:\Exercicios\PDFs" "Exercicio1"
    ```
@@ -148,13 +154,17 @@ Para executar o software, você tem duas opções:
       mv /usr/local/bin/javacorrige.sh /usr/local/bin/javacorrige
       ```
 
-   Agora você pode rodar o programa diretamente:
+   Agora, basta abrir o terminal dentro do diretório em que você armazenou o javaCorrige e então poderá rodar o programa diretamente:
+
    ```bash
    javacorrige "<diretorioGabarito>" "<diretorioAlunos>" "<diretorioPDFs>" "<passoCorrecao>"
    ```
 
    **Exemplo:**
+
    ```bash
+   cd /home/Marvin/Documentos/JavaCorrige/
+
    javacorrige "/home/usuario/exercicios/gabarito" "/home/usuario/exercicios/alunos" "/home/usuario/exercicios/pdfs" "Exercicio1
    ```
 
@@ -165,7 +175,7 @@ Para executar o software, você tem duas opções:
 Para gerar o executável do software, siga estas etapas:
 
 1. Certifique-se de que o JAR com dependências foi gerado. Use o comando:
-   
+
    ```bash
    mvn clean package
    ```
@@ -219,7 +229,3 @@ Após seguir esses passos, você poderá executar o software diretamente pelo ex
 - **Reflection API**: Para análise das classes e comparação com o gabarito.
 - **Apache Maven**: Gerenciador de dependências e execução do projeto.
 - **iText**: Biblioteca para geração de relatórios em PDF.
-
-
-
-

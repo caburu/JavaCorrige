@@ -2,6 +2,7 @@ package com.javacorrige.service.pdf;
 
 import java.util.List;
 import java.util.function.Function;
+
 import com.itextpdf.layout.Document;
 
 import com.itextpdf.layout.element.Paragraph;
@@ -70,6 +71,13 @@ public class PdfElement {
     private static void addTableForConstructors(Document document, List<SpecificationElement<?>> elements) {
         List<String> headers = List.of("Construtor", "Visibilidade", "Modificador", "Parâmetros", "Nota");
 
+        // Cada um dos elementos faz uma filtragem adicional para pegar apenas os
+        // elementos que possuem nota (obtainedGrade > 0).
+        List<SpecificationElement<?>> filteredElements = filterValuableElements(elements);
+
+        if (filteredElements.isEmpty())
+            return;
+
         // Funções que extraem os valores para a tabela
         List<Function<SpecificationElement<?>, String>> valueExtractors = List.of(
                 element -> element.templateString(),
@@ -80,12 +88,17 @@ public class PdfElement {
                         + String.format("%.2f", element.getGrade()));
 
         // Chama o método da classe PdfTableService para gerar a tabela
-        PdfTableService.addTable(document, headers, elements, valueExtractors);
+        PdfTableService.addTable(document, headers, filteredElements, valueExtractors);
     }
 
     // Adiciona tabela para os atributos (fields)
     private static void addTableForFields(Document document, List<SpecificationElement<?>> elements) {
         List<String> headers = List.of("Atributo", "Visibilidade", "Modificador", "Tipo", "Nota");
+
+        List<SpecificationElement<?>> filteredElements = filterValuableElements(elements);
+
+        if (filteredElements.isEmpty())
+            return;
 
         // Funções que extraem os valores para a tabela
         List<Function<SpecificationElement<?>, String>> valueExtractors = List.of(
@@ -97,7 +110,7 @@ public class PdfElement {
                         + String.format("%.2f", element.getGrade()));
 
         // Chama o método da classe PdfTableService para gerar a tabela
-        PdfTableService.addTable(document, headers, elements, valueExtractors);
+        PdfTableService.addTable(document, headers, filteredElements, valueExtractors);
     }
 
     // Adiciona tabela para os métodos
@@ -106,6 +119,11 @@ public class PdfElement {
                 "Nota");
         // List<String> headers = List.of("Metodo", "Visibilidade", "Modificador",
         // "Retorno", "Parâmetros", "Nota");
+
+        List<SpecificationElement<?>> filteredElements = filterValuableElements(elements);
+
+        if (filteredElements.isEmpty())
+            return;
 
         // Funções que extraem os valores para a tabela
         List<Function<SpecificationElement<?>, String>> valueExtractors = List.of(
@@ -119,6 +137,15 @@ public class PdfElement {
                         + String.format("%.2f", element.getGrade()));
 
         // Chama o método da classe PdfTableService para gerar a tabela
-        PdfTableService.addTable(document, headers, elements, valueExtractors);
+        PdfTableService.addTable(document, headers, filteredElements, valueExtractors);
+    }
+
+    /**
+     * Método auxiliar para filtrar os elementos com nota (obtainedGrade > 0)
+     */
+    private static List<SpecificationElement<?>> filterValuableElements(List<SpecificationElement<?>> list) {
+        return list.stream()
+                .filter(e -> e.getGrade() > 0)
+                .toList();
     }
 }
