@@ -2,10 +2,10 @@ package com.javacorrige.service.compilation;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 
 import javax.tools.DiagnosticCollector;
 import javax.tools.JavaCompiler;
@@ -36,27 +36,31 @@ public class CompilationService {
     }
 
     private static CompilationResult compileJavaFiles(File rootDirectory, List<File> javaFiles, List<File> jarFiles) throws IOException {
+        // Cria um diretório para os arquivos compilados. 
         File compileDir = new File(rootDirectory, "bin");
 
+        // "Escuta" para capturar cada erro de sintaxe, aviso ou falha que o compilador encontrar. 
         DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
+        // Lista para armazenar os arquivos não compilados
+        List<File> failedFiles = new ArrayList<>();
         
-        if (javaFiles.isEmpty()) {
-            String errorMessage = "A lista `javaFiles` está vazia.";
-            System.err.println(errorMessage);
-            return new CompilationResult(errorMessage);
-        }
-
         try (StandardJavaFileManager fileManager = createFileManager(rootDirectory, compileDir, diagnostics, jarFiles)) {
-            Iterable<? extends JavaFileObject> compilationUnits = fileManager.getJavaFileObjectsFromFiles(javaFiles);
-            boolean success = executeCompilation(compilationUnits, fileManager, diagnostics);
-            List<File> compiledFiles = success ? getCompiledFilePaths(compileDir, javaFiles) : Collections.emptyList();
-            return new CompilationResult(rootDirectory, compileDir, compiledFiles, diagnostics.getDiagnostics(), jarFiles);
+            // Processa cada arquivo individualmente
+            for (File javaFile : javaFiles) {
+                Iterable<? extends JavaFileObject> compilationUnit = 
+                    fileManager.getJavaFileObjectsFromFiles(Collections.singletonList(javaFile));
+                
+                boolean success = executeCompilation(compilationUnit, fileManager, diagnostics);
+                
+                if (!success) {
+                    failedFiles.add(javaFile);
+                }
+            }
             
-        } catch (IOException e) {
-            String errorMessage = "Erro ao gerenciar arquivos Java: " + e.getMessage();
-            System.err.println(errorMessage);
-            e.printStackTrace();
-            throw e;
+            // Busca todos os arquivos .class gerados no diretório bin, respeitando a estrutura de pacotes.
+            List<File> compiledFiles = com.javacorrige.service.file.FileService.getFilesWithExtension(compileDir, ".class");
+            
+            return new CompilationResult(rootDirectory, compileDir, compiledFiles, failedFiles, diagnostics.getDiagnostics(), jarFiles);
         }
     }
 
@@ -90,12 +94,6 @@ public class CompilationService {
             e.printStackTrace();
             return false;
         }
-    }
-
-    private static List<File> getCompiledFilePaths(File compileDir, List<File> javaFiles) {
-        return javaFiles.stream()
-                .map(javaFile -> new File(compileDir, javaFile.getName().replace(".java", ".class")))
-                .collect(Collectors.toList());
     }
 }
 

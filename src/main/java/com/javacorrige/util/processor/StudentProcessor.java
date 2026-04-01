@@ -40,12 +40,11 @@ public class StudentProcessor {
 
         CompilationResult compilationResult = CompilationService.compileClasses(studentDirectory, javaFiles, jarFiles);
 
-        if (!compilationResult.isSuccess()) {
-            return new Student(studentName, Collections.emptyList(), compilationResult);
+        List<Class<?>> loadedClasses = Collections.emptyList();
+        if (compilationResult.getCompilationDirectory() != null && compilationResult.getCompiledFiles() != null) {
+            loadedClasses = ClassFileLoader.loadClasses(compilationResult.getCompilationDirectory(), 
+                                            compilationResult.getCompiledFiles(), compilationResult.getJarFiles());
         }
-
-        List<Class<?>> loadedClasses = ClassFileLoader.loadClasses(compilationResult.getCompilationDirectory(), 
-                                        compilationResult.getCompiledFiles(), compilationResult.getJarFiles());
                                         
         return new Student(studentName, loadedClasses, compilationResult);
     }
