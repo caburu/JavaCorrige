@@ -41,20 +41,25 @@ public class PdfService {
             }
 
             // Exibir erros de compilação se existirem
-            if (!student.getCompilationResult().getDiagnostics().isEmpty()) {
-                Paragraph compErrorHeader = new Paragraph("Erros/Avisos de Compilação:").setFontSize(14)
+            if (student.getCompilationResult().getFailedFiles() != null && !student.getCompilationResult().getFailedFiles().isEmpty()) {
+                
+                Paragraph compErrorHeader = new Paragraph("Atenção: Arquivos com Erro de Compilação")
+                        .setFontSize(14)
                         .setBold()
                         .setFontColor(ColorConstants.RED)
                         .setMarginTop(10);
                 document.add(compErrorHeader);
 
-                Paragraph studentError = new Paragraph("Erro de compilação por parte do Aluno").setFontSize(16)
-                        .setBold()
-                        .setFontColor(ColorConstants.RED)
-                        .setMarginTop(10);
-                document.add(studentError);
+                // lista o nome de cada arquivo/exercício que falhou
+                for (File failedFile : student.getCompilationResult().getFailedFiles()) {
+                    String fileName = failedFile.getName().replace(".java", "");
+                    Paragraph fileError = new Paragraph("• Falha ao compilar: " + fileName)
+                            .setFontSize(12)
+                            .setFontColor(ColorConstants.RED)
+                            .setMarginLeft(10);
+                    document.add(fileError);
+                }
             }
-
             if (student.getReflectionResult() != null) {
                 PdfReflectionResultService.addReflectionResult(document, student.getReflectionResult());
             }
