@@ -40,21 +40,28 @@ public class PdfService {
                 return;
             }
 
-            // Exibir erros de compilação se existirem
             if (student.getCompilationResult().getFailedFiles() != null && !student.getCompilationResult().getFailedFiles().isEmpty()) {
                 
-                Paragraph compErrorHeader = new Paragraph("Atenção: Arquivos com Erro de Compilação")
+                Paragraph compErrorHeader = new Paragraph("arquivos com erro de compilação:")
                         .setFontSize(14)
                         .setBold()
                         .setFontColor(ColorConstants.RED)
                         .setMarginTop(10);
                 document.add(compErrorHeader);
 
-                // lista o nome de cada arquivo/exercício que falhou
                 for (File failedFile : student.getCompilationResult().getFailedFiles()) {
                     String fileName = failedFile.getName().replace(".java", "");
-                    Paragraph fileError = new Paragraph("• Falha ao compilar: " + fileName)
-                            .setFontSize(12)
+                    
+                    // busca o primeiro erro associado a este arquivo específico
+                    String firstErrorMessage = student.getCompilationResult().getDiagnostics().stream()
+                            .filter(d -> d.getSource() != null && d.getSource().getName().contains(failedFile.getName()))
+                            .map(d -> d.getMessage(java.util.Locale.getDefault()))
+                            .findFirst()
+                            .orElse("erro de sintaxe desconhecido");
+
+                    // exibe: nome da classe - causa do erro
+                    Paragraph fileError = new Paragraph("• " + fileName + ": " + firstErrorMessage)
+                            .setFontSize(11)
                             .setFontColor(ColorConstants.RED)
                             .setMarginLeft(10);
                     document.add(fileError);
