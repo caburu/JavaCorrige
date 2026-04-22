@@ -26,31 +26,50 @@ public class PdfService {
             if (student.getReflectionResult() != null) {
                 grade = student.getReflectionResult().getGrade();
                 obtainedGrade = student.getReflectionResult().getObtainedGrade();
-                if(obtainedGrade < 0) obtainedGrade = 0;
+                if (obtainedGrade < 0)
+                    obtainedGrade = 0;
             }
 
             String gradeString = String.format("%.2f / %.2f", obtainedGrade, grade);
 
-
             PdfHeaderService.addHeader(document, student.getName(), gradeString);
 
-            if(student.getCompilationResult() == null){
+            if (student.getCompilationResult() == null) {
                 document.add(new Paragraph("Nenhum arquivo Java encontrado"));
                 document.close();
                 return;
             }
-            else if(!student.getCompilationResult().isSuccess()){
-                Paragraph studentError = new Paragraph("Erro de compilação por parte do Aluno").setFontSize(16)
-                    .setBold()
-                    .setFontColor(ColorConstants.RED)
-                    .setMarginTop(10);
-                document.add(studentError);
-                document.add(new Paragraph(student.getCompilationResult().getDiagnostics().toString()));
-                document.close();
-                return;
-            }
 
-            PdfReflectionResultService.addReflectionResult(document, student.getReflectionResult());
+            if (student.getCompilationResult().getFailedFiles() != null && !student.getCompilationResult().getFailedFiles().isEmpty()) {
+                
+                Paragraph compErrorHeader = new Paragraph("arquivos com erro de compilação:")
+                        .setFontSize(14)
+                        .setBold()
+                        .setFontColor(ColorConstants.RED)
+                        .setMarginTop(10);
+                document.add(compErrorHeader);
+
+                for (File failedFile : student.getCompilationResult().getFailedFiles()) {
+                    String fileName = failedFile.getName().replace(".java", "");
+                    
+                    // busca o primeiro erro associado a este arquivo específico
+                    String firstErrorMessage = student.getCompilationResult().getDiagnostics().stream()
+                            .filter(d -> d.getSource() != null && d.getSource().getName().contains(failedFile.getName()))
+                            .map(d -> d.getMessage(java.util.Locale.getDefault()))
+                            .findFirst()
+                            .orElse("erro de sintaxe desconhecido");
+
+                    // exibe: nome da classe - causa do erro
+                    Paragraph fileError = new Paragraph("• " + fileName + ": " + firstErrorMessage)
+                            .setFontSize(11)
+                            .setFontColor(ColorConstants.RED)
+                            .setMarginLeft(10);
+                    document.add(fileError);
+                }
+            }
+            if (student.getReflectionResult() != null) {
+                PdfReflectionResultService.addReflectionResult(document, student.getReflectionResult());
+            }
 
             document.close();
         } catch (IOException e) {

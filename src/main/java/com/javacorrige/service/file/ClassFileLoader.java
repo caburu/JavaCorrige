@@ -53,7 +53,9 @@ public class ClassFileLoader {
                 Class<?> clazz = classLoader.loadClass(className);
                 classes.add(clazz);
             } catch (ClassNotFoundException e) {
-                throw new IllegalStateException("Classe não encontrada no arquivo: " + classFile.getAbsolutePath());
+                System.err.println("Classe não encontrada no arquivo: " + classFile.getAbsolutePath());
+            } catch (NoClassDefFoundError e) {
+                System.err.println("Erro ao carregar definição da classe: " + classFile.getAbsolutePath() + " - " + e.getMessage());
             }
         }
     }

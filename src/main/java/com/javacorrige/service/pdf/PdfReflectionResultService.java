@@ -26,11 +26,37 @@ public class PdfReflectionResultService {
             document.add(stepTitle);
 
             if (!exercise.getMissingClasses().isEmpty()) {
-                Paragraph missingClasses = new Paragraph(
-                        "Classes ausentes: " + String.join(", ", exercise.getMissingClasses()))
-                        .setFontColor(ColorConstants.RED)
-                        .setMarginBottom(10);
-                document.add(missingClasses);
+                java.util.List<String> failedFileNames = reflectionResult.getCompilationResult().getFailedFiles() != null ? 
+                    reflectionResult.getCompilationResult().getFailedFiles().stream()
+                        .map(f -> f.getName().replace(".java", ""))
+                        .collect(java.util.stream.Collectors.toList()) : new java.util.ArrayList<>();
+
+                java.util.List<String> trulyMissing = new java.util.ArrayList<>();
+                java.util.List<String> failedCompilation = new java.util.ArrayList<>();
+
+                for (String missingClass : exercise.getMissingClasses()) {
+                    if (failedFileNames.contains(missingClass)) {
+                        failedCompilation.add(missingClass);
+                    } else {
+                        trulyMissing.add(missingClass);
+                    }
+                }
+
+                if (!failedCompilation.isEmpty()) {
+                    Paragraph failedPara = new Paragraph(
+                            "Classes com erro de compilação: " + String.join(", ", failedCompilation))
+                            .setFontColor(ColorConstants.RED)
+                            .setMarginBottom(5);
+                    document.add(failedPara);
+                }
+
+                if (!trulyMissing.isEmpty()) {
+                    Paragraph missingPara = new Paragraph(
+                            "Classes ausentes: " + String.join(", ", trulyMissing))
+                            .setFontColor(ColorConstants.RED)
+                            .setMarginBottom(10);
+                    document.add(missingPara);
+                }
             }
 
             for (ClassCorrection classCorrection : exercise.getCorrectedClasses()) {

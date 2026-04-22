@@ -18,7 +18,7 @@ public class CorrectionController {
 
     public void start(){
         for (Student student : students) {
-            student.setReflectionResult(new ReflectionResult(template, student.getClasses()));
+            student.setReflectionResult(new ReflectionResult(template, student.getClasses(), student.getCompilationResult()));
         }
     }
 }
