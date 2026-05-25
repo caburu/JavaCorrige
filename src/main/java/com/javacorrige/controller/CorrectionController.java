@@ -7,18 +7,24 @@ import com.javacorrige.model.result.correction.ReflectionResult;
 import com.javacorrige.model.template.Template;
 
 public class CorrectionController {
-    
+
     private Template template;
     private List<Student> students;
 
-    public CorrectionController(Template template, List<Student> students){
+    public CorrectionController(Template template, List<Student> students) {
         this.template = template;
         this.students = students;
     }
 
-    public void start(){
+    public void start() {
+        start(null);
+    }
+
+    public void start(String targetClassName) {
         for (Student student : students) {
-            student.setReflectionResult(new ReflectionResult(template, student.getClasses(), student.getCompilationResult()));
+            student.setReflectionResult(
+                    new ReflectionResult(template, student.getClasses(), student.getCompilationResult(),
+                            targetClassName));
         }
     }
 }
