@@ -26,10 +26,12 @@ public class PdfReflectionResultService {
             document.add(stepTitle);
 
             if (!exercise.getMissingClasses().isEmpty()) {
-                java.util.List<String> failedFileNames = reflectionResult.getCompilationResult().getFailedFiles() != null ? 
-                    reflectionResult.getCompilationResult().getFailedFiles().stream()
-                        .map(f -> f.getName().replace(".java", ""))
-                        .collect(java.util.stream.Collectors.toList()) : new java.util.ArrayList<>();
+                java.util.List<String> failedFileNames = reflectionResult
+                        .getCompilationResult().getFailedFiles() != null
+                                ? reflectionResult.getCompilationResult().getFailedFiles().stream()
+                                        .map(f -> f.getName().replace(".java", ""))
+                                        .collect(java.util.stream.Collectors.toList())
+                                : new java.util.ArrayList<>();
 
                 java.util.List<String> trulyMissing = new java.util.ArrayList<>();
                 java.util.List<String> failedCompilation = new java.util.ArrayList<>();

@@ -12,6 +12,7 @@ import com.javacorrige.util.reflection.ClassMapper;
 public class ExerciseCorrection implements Correction {
     private final String exerciseName;
     private final List<ClassCorrection> classes;
+    private Double grade;
 
     public ExerciseCorrection(Exercise exercise, List<Class<?>> studentClasses) {
         this(exercise, studentClasses, null);
@@ -19,6 +20,7 @@ public class ExerciseCorrection implements Correction {
 
     public ExerciseCorrection(Exercise exercise, List<Class<?>> studentClasses, String targetClassName) {
         this.exerciseName = exercise.getExerciseName();
+        this.grade = null;
         this.classes = initializeClasses(exercise.getClasses(), studentClasses, targetClassName);
     }
 
@@ -30,7 +32,7 @@ public class ExerciseCorrection implements Correction {
         mappedClasses.forEach((template, student) -> {
             if (template != null) {
                 // Se não houver filtro OU se o nome da classe bater com o filtro, adiciona
-                // normalmente 
+                // normalmente
                 if (targetClassName == null || template.getSimpleName().equalsIgnoreCase(targetClassName)
                         || template.getName().equalsIgnoreCase(targetClassName)) {
                     corrections.add(new ClassCorrection(template, student));
@@ -59,6 +61,14 @@ public class ExerciseCorrection implements Correction {
     }
 
     public double getGrade() {
+        // Evita recalcular a nota toda vez que o método é chamado
+        if (grade == null) {
+            grade = calculeGrade();
+        }
+        return grade;
+    }
+
+    private double calculeGrade() {
         return classes.stream().mapToDouble(ClassCorrection::getGrade).sum();
     }
 
