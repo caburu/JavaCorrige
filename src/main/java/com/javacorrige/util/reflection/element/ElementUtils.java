@@ -92,8 +92,6 @@ public class ElementUtils {
         Method templateMethod = (Method) template;
         Method studentMethod = (Method) student;
 
-        // if(!studentMethod.equals(templateMethod)) return false;
-
         String[] methodParameters = getMethodParametersTest(templateMethod);
         String[] constructorParameters = getConstructorParametersTest(templateMethod);
 
@@ -121,20 +119,22 @@ public class ElementUtils {
             // Execute ambos os métodos com os mesmos parâmetros
             Object templateResult = templateMethod.invoke(templateInstance, convertedMethodParameters);
             Object studentResult = studentMethod.invoke(studentInstance, convertedMethodParameters);
-            
-        
+
             // Compare os resultados
             return compareResults(templateResult, studentResult) && compareStates(templateInstance, studentInstance);
 
         } catch (Exception e) {
             // e.printStackTrace(); // Exibe o stack trace completo
             return false;
+        } finally {
+            for (java.awt.Window window : java.awt.Window.getWindows()) {
+                window.setVisible(false);
+                window.dispose();
+            }
         }
     }
 
     private static Constructor<?> findConstructorWithParameters(Class<?> declaringClass, int parametersLength) {
-        // if(parametersLength == 0) return null;
-
         Constructor<?>[] constructors = declaringClass.getConstructors();
 
         Constructor<?> matchingConstructor = null;
@@ -159,7 +159,7 @@ public class ElementUtils {
             return result1.equals(result2);
         }
 
-        // Se for um objeto complexo, compara recursivamente 
+        // Se for um objeto complexo, compara recursivamente
         return compareStates(result1, result2);
     }
 
