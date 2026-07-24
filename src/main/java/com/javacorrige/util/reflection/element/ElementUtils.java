@@ -95,38 +95,61 @@ public class ElementUtils {
         String[] methodParameters = getMethodParametersTest(templateMethod);
         String[] constructorParameters = getConstructorParametersTest(templateMethod);
 
+        // Guarda a referência do console original
+        java.io.PrintStream originalOut = System.out;
+        java.io.ByteArrayOutputStream templateStream = new java.io.ByteArrayOutputStream();
+        java.io.ByteArrayOutputStream studentStream = new java.io.ByteArrayOutputStream();
+
         try {
-            // Converta os parâmetros da anotacão para os tipos correspondentes no método
             Object[] convertedMethodParameters = convertParameters(templateMethod, methodParameters);
 
             Constructor<?> matchingTemplateConstructor = findConstructorWithParameters(
                     templateMethod.getDeclaringClass(), constructorParameters.length);
-            Constructor<?> matchingStudentConstructor = findConstructorWithParameters(studentMethod.getDeclaringClass(),
-                    constructorParameters.length);
+            Constructor<?> matchingStudentConstructor = findConstructorWithParameters(
+                    studentMethod.getDeclaringClass(), constructorParameters.length);
 
             Class<?>[] constructorParameterTypes = matchingTemplateConstructor.getParameterTypes();
 
-            // Converta os parâmetros do construtor para os tipos correspondentes
             Object[] convertedConstructorParameters = convertConstructorParameters(constructorParameters,
                     constructorParameterTypes);
 
-            // Crie instâncias para invocar os métodos, se necessário
             Object templateInstance = Modifier.isStatic(templateMethod.getModifiers()) ? null
                     : matchingTemplateConstructor.newInstance(convertedConstructorParameters);
             Object studentInstance = Modifier.isStatic(studentMethod.getModifiers()) ? null
                     : matchingStudentConstructor.newInstance(convertedConstructorParameters);
 
-            // Execute ambos os métodos com os mesmos parâmetros
+            System.setOut(new java.io.PrintStream(templateStream));
             Object templateResult = templateMethod.invoke(templateInstance, convertedMethodParameters);
+
+            System.setOut(new java.io.PrintStream(studentStream));
             Object studentResult = studentMethod.invoke(studentInstance, convertedMethodParameters);
 
-            // Compare os resultados
-            return compareResults(templateResult, studentResult) && compareStates(templateInstance, studentInstance);
+            System.setOut(originalOut);
+
+            String expectedConsole = normalizeText(templateStream.toString());
+            String actualConsole = normalizeText(studentStream.toString());
+
+            if (!expectedConsole.isEmpty()) {
+                boolean consoleMatched = expectedConsole.equals(actualConsole);
+                if (!consoleMatched)
+                    return false; // Se a impressão falhar, o teste reprova
+            }
+
+            boolean isVoid = templateMethod.getReturnType().equals(Void.TYPE);
+            if (!isVoid) {
+                boolean resultMatched = compareResults(templateResult, studentResult);
+                if (!resultMatched)
+                    return false;
+            }
+
+            return compareStates(templateInstance, studentInstance);
 
         } catch (Exception e) {
-            // e.printStackTrace(); // Exibe o stack trace completo
             return false;
         } finally {
+            // Garantia de restauração do console e fechamento de janelas
+            System.setOut(originalOut);
+
             for (java.awt.Window window : java.awt.Window.getWindows()) {
                 window.setVisible(false);
                 window.dispose();
@@ -349,6 +372,18 @@ public class ElementUtils {
     }
 
     // --- Métodos Auxiliares ---
+
+    /**
+     * Normaliza o texto impresso no console para evitar divergências por causa
+     * de quebras de linha entre sistemas operacionais (\r\n vs \n) ou espaços
+     * extras.
+     */
+    private static String normalizeText(String input) {
+        if (input == null)
+            return "";
+        return input.replace("\r\n", "\n")
+                .trim();
+    }
 
     private static int getModifiers(Object element) {
         if (element instanceof Field)
