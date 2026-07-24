@@ -11,6 +11,7 @@ public class ReflectionResult implements Correction {
     private final String templateName;
     private final List<ExerciseCorrection> exercises;
     private final CompilationResult compilationResult;
+    private Double obtainedGrade;
 
     public ReflectionResult(Template template, List<Class<?>> studentClasses, CompilationResult compilationResult) {
         this(template, studentClasses, compilationResult, null);
@@ -21,6 +22,7 @@ public class ReflectionResult implements Correction {
         this.templateName = template.getTemplateName();
         this.compilationResult = compilationResult;
         this.exercises = initializeExercises(template, studentClasses, targetClassName);
+        this.obtainedGrade = null;
     }
 
     private List<ExerciseCorrection> initializeExercises(Template template, List<Class<?>> studentClasses,
@@ -47,6 +49,13 @@ public class ReflectionResult implements Correction {
     }
 
     public double getObtainedGrade() {
+        if (obtainedGrade == null) {
+            obtainedGrade = calculeObtainedGrade();
+        }
+        return obtainedGrade;
+    }
+
+    private double calculeObtainedGrade() {
         return exercises.stream().mapToDouble(ExerciseCorrection::getObtainedGrade).sum();
     }
 }
