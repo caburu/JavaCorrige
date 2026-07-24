@@ -101,29 +101,43 @@ public class ElementUtils {
         java.io.ByteArrayOutputStream studentStream = new java.io.ByteArrayOutputStream();
 
         try {
-            Object[] convertedMethodParameters = convertParameters(templateMethod, methodParameters);
-
             Constructor<?> matchingTemplateConstructor = findConstructorWithParameters(
                     templateMethod.getDeclaringClass(), constructorParameters.length);
             Constructor<?> matchingStudentConstructor = findConstructorWithParameters(
                     studentMethod.getDeclaringClass(), constructorParameters.length);
 
-            Class<?>[] constructorParameterTypes = matchingTemplateConstructor.getParameterTypes();
+            if (matchingTemplateConstructor == null || matchingStudentConstructor == null) {
+                return false;
+            }
 
-            Object[] convertedConstructorParameters = convertConstructorParameters(constructorParameters,
-                    constructorParameterTypes);
+            matchingTemplateConstructor.setAccessible(true);
+            matchingStudentConstructor.setAccessible(true);
+
+            Class<?>[] templateConstructorParamTypes = matchingTemplateConstructor.getParameterTypes();
+            Class<?>[] studentConstructorParamTypes = matchingStudentConstructor.getParameterTypes();
+
+            Object[] convertedTemplateConstructorParameters = convertConstructorParameters(
+                    constructorParameters, templateConstructorParamTypes);
+            Object[] convertedStudentConstructorParameters = convertConstructorParameters(
+                    constructorParameters, studentConstructorParamTypes);
+
+            Object[] convertedTemplateMethodParameters = convertParameters(templateMethod, methodParameters);
+            Object[] convertedStudentMethodParameters = convertParameters(studentMethod, methodParameters);
 
             Object templateInstance = Modifier.isStatic(templateMethod.getModifiers()) ? null
-                    : matchingTemplateConstructor.newInstance(convertedConstructorParameters);
+                    : matchingTemplateConstructor.newInstance(convertedTemplateConstructorParameters);
             Object studentInstance = Modifier.isStatic(studentMethod.getModifiers()) ? null
-                    : matchingStudentConstructor.newInstance(convertedConstructorParameters);
+                    : matchingStudentConstructor.newInstance(convertedStudentConstructorParameters);
 
+            // Executa o gabarito capturando o System.out
             System.setOut(new java.io.PrintStream(templateStream));
-            Object templateResult = templateMethod.invoke(templateInstance, convertedMethodParameters);
+            Object templateResult = templateMethod.invoke(templateInstance, convertedTemplateMethodParameters);
 
+            // Executa o estudante capturando o System.out
             System.setOut(new java.io.PrintStream(studentStream));
-            Object studentResult = studentMethod.invoke(studentInstance, convertedMethodParameters);
+            Object studentResult = studentMethod.invoke(studentInstance, convertedStudentMethodParameters);
 
+            // Restaura o console padrão
             System.setOut(originalOut);
 
             String expectedConsole = normalizeText(templateStream.toString());
@@ -132,7 +146,7 @@ public class ElementUtils {
             if (!expectedConsole.isEmpty()) {
                 boolean consoleMatched = expectedConsole.equals(actualConsole);
                 if (!consoleMatched)
-                    return false; // Se a impressão falhar, o teste reprova
+                    return false;
             }
 
             boolean isVoid = templateMethod.getReturnType().equals(Void.TYPE);
@@ -147,7 +161,7 @@ public class ElementUtils {
         } catch (Exception e) {
             return false;
         } finally {
-            // Garantia de restauração do console e fechamento de janelas
+            // Garantia de restauração do console e liberação de interfaces gráficas
             System.setOut(originalOut);
 
             for (java.awt.Window window : java.awt.Window.getWindows()) {
@@ -489,25 +503,71 @@ public class ElementUtils {
 
     private static Object convertToType(String parameter, Class<?> type) throws IllegalArgumentException {
         try {
+            String trimmedParam = parameter.trim();
+
+            // Tipos Primitivos e Básicos
             if (type == int.class || type == Integer.class) {
-                return Integer.parseInt(parameter);
+                return Integer.parseInt(trimmedParam);
             } else if (type == double.class || type == Double.class) {
-                return Double.parseDouble(parameter);
+                return Double.parseDouble(trimmedParam);
             } else if (type == float.class || type == Float.class) {
-                return Float.parseFloat(parameter);
+                return Float.parseFloat(trimmedParam);
             } else if (type == boolean.class || type == Boolean.class) {
-                return Boolean.parseBoolean(parameter);
+                return Boolean.parseBoolean(trimmedParam);
             } else if (type == long.class || type == Long.class) {
-                return Long.parseLong(parameter);
+                return Long.parseLong(trimmedParam);
             } else if (type == String.class) {
-                return parameter;
-            } else {
-                throw new IllegalArgumentException("Tipo não suportado: " + type.getName());
+                // Remove aspas simples se o professor tiver digitado 'Texto'
+                return trimmedParam.replaceAll("^'|'$", "");
             }
+
+            // Objetos
+            if (isNestedObject(trimmedParam)) {
+                return instantiateObject(trimmedParam, type);
+            }
+
+            throw new IllegalArgumentException("Tipo não suportado ou formato inválido: " + type.getName());
+
         } catch (Exception e) {
             throw new IllegalArgumentException(
-                    "Falha ao converter parâmetro '" + parameter + "' para o tipo " + type.getName());
+                    "Falha ao converter parâmetro '" + parameter + "' para o tipo " + type.getName(), e);
         }
+    }
+
+    /**
+     * Verifica se a String segue o padrão esperado de um objeto
+     */
+    private static boolean isNestedObject(String param) {
+        return param.contains("(") && param.endsWith(")");
+    }
+
+    /**
+     * Faz o parse do objeto e retorna uma instância do mesmo
+     */
+    private static Object instantiateObject(String objString, Class<?> expectedType) throws Exception {
+        int firstParen = objString.indexOf('(');
+        String rawInnerParams = objString.substring(firstParen + 1, objString.length() - 1);
+
+        String[] innerParams = rawInnerParams.isEmpty() ? new String[0] : rawInnerParams.split(",");
+
+        // Busca o construtor que aceita essa quantidade de parâmetros
+        Constructor<?> matchingConstructor = findConstructorWithParameters(expectedType, innerParams.length);
+
+        if (matchingConstructor == null) {
+            throw new IllegalArgumentException("Nenhum construtor em " + expectedType.getSimpleName() +
+                    " aceita " + innerParams.length + " parâmetros.");
+        }
+
+        matchingConstructor.setAccessible(true);
+
+        Class<?>[] paramTypes = matchingConstructor.getParameterTypes();
+        Object[] convertedInnerArgs = new Object[innerParams.length];
+
+        for (int i = 0; i < innerParams.length; i++) {
+            convertedInnerArgs[i] = convertToType(innerParams[i].trim(), paramTypes[i]);
+        }
+
+        return matchingConstructor.newInstance(convertedInnerArgs);
     }
 
 }
