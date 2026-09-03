@@ -19,9 +19,10 @@ public class ReflectionResult implements Correction {
 
     public ReflectionResult(Template template, List<Class<?>> studentClasses, CompilationResult compilationResult,
             String targetClassName) {
-        this.templateName = template.getTemplateName();
+        // Lida com a possibilidade do template ser null
+        this.templateName = template == null ? null : template.getTemplateName();
         this.compilationResult = compilationResult;
-        this.exercises = initializeExercises(template, studentClasses, targetClassName);
+        this.exercises = template == null ? null : initializeExercises(template, studentClasses, targetClassName);
         this.obtainedGrade = null;
     }
 

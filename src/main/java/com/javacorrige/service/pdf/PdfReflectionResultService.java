@@ -8,7 +8,6 @@ import com.javacorrige.model.result.correction.exercise.ExerciseCorrection;
 import com.javacorrige.model.result.correction.exercise.clazz.ClassCorrection;
 
 public class PdfReflectionResultService {
-
     public static void addReflectionResult(Document document, ReflectionResult reflectionResult) {
         for (ExerciseCorrection exercise : reflectionResult.getExercises()) {
 
