@@ -4,8 +4,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.javacorrige.model.result.correction.SpecificationElement;
 import com.javacorrige.model.result.correction.exercise.clazz.specification.ConstructorCorrection;
@@ -34,7 +34,7 @@ public class ClassCorrection {
             return elementList;
         }
 
-        HashMap<Object, Object> mappedElements = ElementMapper.mapElements(template, student);
+        Map<Object, Object> mappedElements = ElementMapper.mapElements(template, student);
 
         mappedElements.forEach((templateElement, studentElement) -> {
             if (templateElement instanceof Field || studentElement instanceof Field) {
