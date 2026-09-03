@@ -128,6 +128,9 @@ public class ElementUtils {
                     : matchingTemplateConstructor.newInstance(convertedTemplateConstructorParameters);
             Object studentInstance = Modifier.isStatic(studentMethod.getModifiers()) ? null
                     : matchingStudentConstructor.newInstance(convertedStudentConstructorParameters);
+            
+            templateMethod.setAccessible(true);
+            studentMethod.setAccessible(true);
 
             // Executa o gabarito capturando o System.out
             System.setOut(new java.io.PrintStream(templateStream));
@@ -196,6 +199,11 @@ public class ElementUtils {
             return result1.equals(result2);
         }
 
+        // Se for uma coleção 
+        if (result1 instanceof Iterable && result2 instanceof Iterable) {
+            return compareIterables((Iterable<?>) result1, (Iterable<?>) result2);
+        }
+
         // Se for um objeto complexo, compara recursivamente
         return compareStates(result1, result2);
     }
@@ -249,6 +257,24 @@ public class ElementUtils {
             return false;
         }
         return true;
+    }
+
+    private static boolean compareIterables(Iterable<?> it1, Iterable<?> it2) {
+        java.util.Iterator<?> iter1 = it1.iterator();
+        java.util.Iterator<?> iter2 = it2.iterator();
+
+        while (iter1.hasNext() && iter2.hasNext()) {
+            Object item1 = iter1.next();
+            Object item2 = iter2.next();
+            
+            // Compara cada item da lista recursivamente
+            if (!compareResults(item1, item2)) {
+                return false;
+            }
+        }
+        
+        // Retorna true apenas se ambos iteradores chegaram ao fim juntos (mesmo tamanho)
+        return !iter1.hasNext() && !iter2.hasNext();
     }
 
     // --- ANOTAÇÕES ---
