@@ -9,6 +9,10 @@ import java.util.List;
 
 public class ElementExtractor {
 
+    private ElementExtractor() {
+
+    }
+
     public static List<Object> extractElements(Class<?> clazz) {
         List<Object> elements = new ArrayList<>();
         if (clazz != null) {
@@ -18,7 +22,7 @@ public class ElementExtractor {
         }
         return elements;
     }
-    
+
     public static List<Field> extractFields(Class<?> clazz) {
         return Arrays.asList(clazz.getDeclaredFields());
     }

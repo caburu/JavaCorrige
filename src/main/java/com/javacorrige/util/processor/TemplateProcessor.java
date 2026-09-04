@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.logging.Logger;
 
 import com.javacorrige.model.result.compilation.CompilationResult;
 import com.javacorrige.model.template.Template;
@@ -14,13 +15,16 @@ import com.javacorrige.service.file.FileService;
 
 public class TemplateProcessor {
 
+    private static final Logger LOGGER = Logger.getLogger(TemplateProcessor.class.getName());
+
+    private TemplateProcessor() {
+    }
+
     public static Template processTemplateDirectory(File templateDirectory, String stepCorrection) {
         File[] subDirs = FileService.organizeStepDirectories(templateDirectory, stepCorrection);
 
         String templateName = templateDirectory.getName();
         List<Exercise> exercises = new ArrayList<>();
-
-        // File[] subDirs = FileService.getDirectSubdirectories(templateDirectory);
 
         for (File subDir : subDirs) {
             Exercise exercise = processSingleExerciseDirectory(subDir);
@@ -34,9 +38,9 @@ public class TemplateProcessor {
         String exerciseName = exerciseDirectory.getName();
         List<File> javaFiles = FileService.getFilesWithExtension(exerciseDirectory, ".java");
         List<File> jarFiles = FileService.getFilesWithExtension(exerciseDirectory, ".jar");
-
+        
         if (javaFiles.isEmpty()) {
-            // TODO: adicionar logger
+            LOGGER.info("A pasta: '" + exerciseDirectory.getName() + "', do gabarito, está vazia!"); 
             return null;
         }
 
@@ -62,9 +66,11 @@ public class TemplateProcessor {
 
     private static List<Class<?>> loadCompiledClasses(CompilationResult compilationResult, String exerciseName) {
         try {
-            return ClassFileLoader.loadClasses(compilationResult.getCompilationDirectory(), compilationResult.getCompiledFiles(), compilationResult.getJarFiles());
+            return ClassFileLoader.loadClasses(compilationResult.getCompilationDirectory(),
+                    compilationResult.getCompiledFiles(), compilationResult.getJarFiles());
         } catch (Exception e) {
-            throw new IllegalStateException("Erro ao carregar classes compiladas para o gabarito -> exercício: " + exerciseName, e);
+            throw new IllegalStateException(
+                    "Erro ao carregar classes compiladas para o gabarito -> exercício: " + exerciseName, e);
         }
     }
 }

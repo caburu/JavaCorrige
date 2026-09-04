@@ -40,17 +40,17 @@ public abstract class SpecificationElement<T> implements ISpecificationElement {
     @Override
     public boolean checkReturnType() {
         return ElementUtils.checkReturnType(template, student);
-    };
+    }
 
     @Override
     public boolean checkType() {
         return ElementUtils.checkType(template, student);
-    };
+    }
 
     @Override
     public boolean checkParameters() {
         return ElementUtils.checkParameters(template, student);
-    };
+    }
 
     public boolean checkTest() {
         return ElementUtils.checkTest(template, student);
@@ -60,15 +60,6 @@ public abstract class SpecificationElement<T> implements ISpecificationElement {
     public double getGrade() {
         return ElementUtils.getGrade(template);
     }
-
-    @Override
-    public abstract double getObtainedGrade();
-
-    @Override
-    public abstract String templateString();
-
-    @Override
-    public abstract String studentString();
 
     @Override
     public String toString() {

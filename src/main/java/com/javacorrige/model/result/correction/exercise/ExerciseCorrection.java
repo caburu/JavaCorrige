@@ -1,8 +1,8 @@
 package com.javacorrige.model.result.correction.exercise;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.javacorrige.model.result.correction.Correction;
 import com.javacorrige.model.result.correction.exercise.clazz.ClassCorrection;
@@ -30,7 +30,7 @@ public class ExerciseCorrection implements Correction {
 
     private List<ClassCorrection> initializeClasses(List<Class<?>> templateClasses, List<Class<?>> studentClasses,
             String targetClassName) {
-        HashMap<Class<?>, Class<?>> mappedClasses = ClassMapper.mapClasses(templateClasses, studentClasses);
+        Map<Class<?>, Class<?>> mappedClasses = ClassMapper.mapClasses(templateClasses, studentClasses);
         List<ClassCorrection> corrections = new ArrayList<>();
 
         mappedClasses.forEach((template, student) -> {

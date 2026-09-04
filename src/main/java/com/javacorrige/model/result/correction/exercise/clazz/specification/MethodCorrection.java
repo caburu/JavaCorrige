@@ -6,7 +6,6 @@ import com.javacorrige.model.result.correction.SpecificationElement;
 
 public class MethodCorrection extends SpecificationElement<Method>{
 
-    // public static double methodName(int ano);
     // visibility modifier return name parameters
     public MethodCorrection(Method template, Method student) {
         super(template, student);
