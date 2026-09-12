@@ -8,7 +8,6 @@ import com.javacorrige.model.result.correction.exercise.ExerciseCorrection;
 import com.javacorrige.model.result.correction.exercise.clazz.ClassCorrection;
 
 public class PdfReflectionResultService {
-
     public static void addReflectionResult(Document document, ReflectionResult reflectionResult) {
         for (ExerciseCorrection exercise : reflectionResult.getExercises()) {
 
@@ -26,10 +25,12 @@ public class PdfReflectionResultService {
             document.add(stepTitle);
 
             if (!exercise.getMissingClasses().isEmpty()) {
-                java.util.List<String> failedFileNames = reflectionResult.getCompilationResult().getFailedFiles() != null ? 
-                    reflectionResult.getCompilationResult().getFailedFiles().stream()
-                        .map(f -> f.getName().replace(".java", ""))
-                        .collect(java.util.stream.Collectors.toList()) : new java.util.ArrayList<>();
+                java.util.List<String> failedFileNames = reflectionResult
+                        .getCompilationResult().getFailedFiles() != null
+                                ? reflectionResult.getCompilationResult().getFailedFiles().stream()
+                                        .map(f -> f.getName().replace(".java", ""))
+                                        .collect(java.util.stream.Collectors.toList())
+                                : new java.util.ArrayList<>();
 
                 java.util.List<String> trulyMissing = new java.util.ArrayList<>();
                 java.util.List<String> failedCompilation = new java.util.ArrayList<>();

@@ -15,18 +15,22 @@ public class AppController {
     private String stepCorrection;
 
     public AppController(File templateDirectory, File studentsDirectory, File pdfDirectory, String stepCorrection) {
-        this.templateDirectory = templateDirectory;   
+        this.templateDirectory = templateDirectory;
         this.studentsDirectory = studentsDirectory;
         this.pdfDirectory = pdfDirectory;
         this.stepCorrection = stepCorrection;
     }
-    
+
     public void start() {
+        start(null);
+    }
+
+    public void start(String targetClassName) {
         Template template = TemplateProcessor.processTemplateDirectory(templateDirectory, stepCorrection);
         List<Student> students = StudentProcessor.processStudentDirectory(studentsDirectory);
 
         CorrectionController correctionController = new CorrectionController(template, students);
-        correctionController.start();
+        correctionController.start(targetClassName);
 
         PdfController pdfController = new PdfController(students, pdfDirectory);
         pdfController.start();

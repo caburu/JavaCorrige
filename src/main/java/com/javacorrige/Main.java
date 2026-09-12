@@ -8,7 +8,7 @@ import com.javacorrige.view.GraphicalInterface;
 
 public class Main {
     public static void main(String[] args) {
-        if (args.length == 4) {
+        if (args.length == 4 || args.length == 5) {
             // Executa no modo linha de comando
             try {
                 String templateDir = args[0];
@@ -17,15 +17,22 @@ public class Main {
                 String stepCorrection = args[3];
 
                 // Validação dos argumentos
-                InputValidator.validateArguments(new String[]{templateDir, studentsDir, pdfDir, stepCorrection});
+                InputValidator.validateArguments(new String[] { templateDir, studentsDir, pdfDir, stepCorrection });
 
                 File templateDirectory = new File(templateDir);
                 File studentsDirectory = new File(studentsDir);
                 File pdfDirectory = new File(pdfDir);
 
                 // Inicializa o controlador principal
-                AppController app = new AppController(templateDirectory, studentsDirectory, pdfDirectory, stepCorrection);
-                app.start();
+                AppController app = new AppController(templateDirectory, studentsDirectory, pdfDirectory,
+                        stepCorrection);
+
+                // Checa se foi especificada uma classe para correção
+                if (args.length == 5) {
+                    app.start(args[4]);
+                } else {
+                    app.start();
+                }
 
                 System.out.println("Software executado com sucesso!");
             } catch (Exception ex) {
@@ -40,9 +47,11 @@ public class Main {
             // Número de argumentos inválido
             System.err.println("Uso incorreto do programa.");
             System.err.println("Para executar via linha de comando:");
-            System.err.println("java -cp target/javacorrige-1.0-SNAPSHOT-jar-with-dependencies.jar com.javacorrige.Main <diretorioGabarito> <diretorioAlunos> <diretorioPDFs> <passoCorrecao>");
+            System.err.println(
+                    "java -cp target/javacorrige-1.0-SNAPSHOT-jar-with-dependencies.jar com.javacorrige.Main <diretorioGabarito> <diretorioAlunos> <diretorioPDFs> <passoCorrecao> [nomeClasseOpcional]");
+            System.err.println("\nExemplo para corrigir apenas uma classe:");
+            System.err.println("java -cp ... com.javacorrige.Main ./gabarito ./alunos ./pdfs gabarito1 ContaBancaria");
             System.err.println("Ou execute sem argumentos para usar a interface gráfica.");
         }
     }
 }
-

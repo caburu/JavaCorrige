@@ -36,7 +36,8 @@ public class TemplateProcessor {
         List<File> jarFiles = FileService.getFilesWithExtension(exerciseDirectory, ".jar");
 
         if (javaFiles.isEmpty()) {
-            throw new IllegalStateException("Nenhum arquivo Java encontrado no gabarito para o exercício: " + exerciseName);
+            // TODO: adicionar logger
+            return null;
         }
 
         CompilationResult compilationResult = CompilationService.compileClasses(exerciseDirectory, javaFiles, jarFiles);
