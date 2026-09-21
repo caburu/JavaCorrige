@@ -2,7 +2,9 @@ package com.javacorrige.service.pdf;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.layout.Document;
@@ -78,40 +80,61 @@ public class PdfReflectionResultService {
         }
     }
 
+    /**
+     * Adiciona os dados dos estudantes ao relatório geral.
+     * 
+     * @param document Documento em que os dados devem ser inseridos.
+     * @param students Lista de estudantes que devem ser adicionados ao relatório
+     *                 geral.
+     */
     public static void addReflectionResultGeneralReport(Document document,
             List<Student> students) {
         Table table = generateGeneralReportTable();
-        Set<String> exerciseNames = new HashSet<>();
 
         for (Student student : students) {
-            StringBuilder correctedClassesBuilder = new StringBuilder();
-
-            for (ExerciseCorrection exercise : student.getReflectionResult().getExercises()) {
-                if (exercise.getGrade() > 0) {
-                    if (!exerciseNames.contains(exercise.getExerciseName())) {
-                        exerciseNames.add(exercise.getExerciseName());
-                    }
-
-                    for (ClassCorrection classCorrection : exercise.getCorrectedClasses()) {
-                        if (classCorrection.getGrade() > 0) {
-                            correctedClassesBuilder.append(" ")
-                                    .append(PdfClassCorrection.getSimpleClassCorrection(classCorrection));
-                        }
-                    }
-                }
-            }
-
-            addStudentToTable(table, correctedClassesBuilder.toString(), student);
+            String correctedClasses = formatCorrectedClasses(student);
+            addStudentToTable(table, correctedClasses, student);
         }
 
-        StringBuilder exerciseName = new StringBuilder();
-        for (String name : exerciseNames) {
-            exerciseName.append(" ")
-                    .append(name);
-        }
-
-        addTitle(exerciseName.toString(), document);
+        String exercisesNamesHeader = extractExerciseNamesHeader(students);
+        addTitle(exercisesNamesHeader, document);
         document.add(table);
+    }
+
+    /** 
+     * Retorna as classes de um estudante formatadas para o relatório geral.
+     * 
+     * @param student estudante que deseja obter as classes
+     * @return classes formatadas
+     */
+    private static String formatCorrectedClasses(Student student) {
+        if (student.getCompilationResult().getFailedFiles() != null && !student.getCompilationResult().getFailedFiles().isEmpty()) {
+            return "Erro ao compilar execícios!";
+        }
+
+        if (student.getReflectionResult() == null || student.getReflectionResult().getExercises() == null) {
+            return "Exercício não encontrado!";
+        }
+
+        // Percorre os exercícios dos estudantes e retorna a lista de classes corrigidas
+        return student.getReflectionResult().getExercises().stream().filter(e -> e.getGrade() > 0)
+                .flatMap(e -> e.getCorrectedClasses().stream())
+                .filter(c -> c.getGrade() > 0).map(PdfClassCorrection::getSimpleClassCorrection)
+                .collect(Collectors.joining(", "));
+    }
+
+    /**
+     * Recebe uma lista de estudantes e retorna uma String contendo o nome dos
+     * exercícios feitos por eles.
+     * 
+     * @param students estudantes que vão ser avaliados
+     * @return String contendo o nome dos exercícios corrigidos
+     */
+    private static String extractExerciseNamesHeader(List<Student> students) {
+        return students.stream().map(Student::getReflectionResult).filter(Objects::nonNull)
+                .flatMap(r -> r.getExercises().stream())
+                .filter(e -> e.getGrade() > 0).map(ExerciseCorrection::getExerciseName).distinct()
+                .collect(Collectors.joining(", "));
     }
 
     // Método auxiliar para criar as células da tabela
@@ -155,5 +178,4 @@ public class PdfReflectionResultService {
         table.addCell(createCell(finalGrade));
         table.addCell(createCell(correctedClasses));
     }
-
 }
