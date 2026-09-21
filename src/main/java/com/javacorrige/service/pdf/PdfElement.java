@@ -1,6 +1,5 @@
 package com.javacorrige.service.pdf;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.BiConsumer;
@@ -27,7 +26,6 @@ public class PdfElement {
         List<SpecificationElement<?>> fields = ElementFilter.getElementsByType(elements, ElementType.FIELD);
         List<SpecificationElement<?>> methods = ElementFilter.getElementsByType(elements, ElementType.METHOD);
 
-     
         GradeSummary constrGrades = calculateGrades(constructors);
         GradeSummary fieldGrades = calculateGrades(fields);
         GradeSummary methodGrades = calculateGrades(methods);

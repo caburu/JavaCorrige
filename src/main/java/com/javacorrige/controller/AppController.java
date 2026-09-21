@@ -33,6 +33,6 @@ public class AppController {
         correctionController.start(targetClassName);
 
         PdfController pdfController = new PdfController(students, pdfDirectory);
-        pdfController.start();
+        pdfController.start(templateDirectory + "/" + stepCorrection);
     }
 }

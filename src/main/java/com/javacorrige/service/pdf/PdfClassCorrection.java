@@ -16,6 +16,9 @@ import com.javacorrige.util.reflection.element.ElementFilter.ElementType;
 
 public class PdfClassCorrection {
 
+    private PdfClassCorrection() {
+    }
+
     public static void addClassCorrection(Document document, ClassCorrection classCorrection) {
 
         // Adiciona o título da classe
@@ -40,6 +43,12 @@ public class PdfClassCorrection {
 
         // Adiciona os elementos corrigidos
         PdfElement.addElementSection(document, classCorrection.getCorrectedElements());
+    }
+
+    public static String getSimpleClassCorrection(ClassCorrection classCorrection) {
+        return "Classe `" + classCorrection.getTemplate().getSimpleName() + "`("
+                + String.format("%.2f", classCorrection.getObtainedGrade()) + "/"
+                + String.format("%.2f", classCorrection.getGrade()) + ")";
     }
 
     private static void addTitle(Document document, String titleText) {

@@ -38,24 +38,24 @@ public class TemplateProcessor {
         String exerciseName = exerciseDirectory.getName();
         List<File> javaFiles = FileService.getFilesWithExtension(exerciseDirectory, ".java");
         List<File> jarFiles = FileService.getFilesWithExtension(exerciseDirectory, ".jar");
-        
+
         if (javaFiles.isEmpty()) {
-            LOGGER.info("A pasta: '" + exerciseDirectory.getName() + "', do gabarito, está vazia!"); 
+            LOGGER.info("A pasta: '" + exerciseDirectory.getName() + "', do gabarito, está vazia!");
             return null;
         }
 
         CompilationResult compilationResult = CompilationService.compileClasses(exerciseDirectory, javaFiles, jarFiles);
 
         if (!compilationResult.isSuccess()) {
-            StringBuilder errorMessage = new StringBuilder("Gabarito não pode conter erros de compilação: " + exerciseName + "\n");
+            StringBuilder errorMessage = new StringBuilder(
+                    "Gabarito não pode conter erros de compilação: " + exerciseName + "\n");
 
-            compilationResult.getDiagnostics().forEach(diagnostic -> {
-                errorMessage.append("Código: ").append(diagnostic.getCode()).append("\n")
+            compilationResult.getDiagnostics()
+                    .forEach(diagnostic -> errorMessage.append("Código: ").append(diagnostic.getCode()).append("\n")
                             .append("Mensagem: ").append(diagnostic.getMessage(Locale.getDefault())).append("\n")
                             .append("Localização: ").append(diagnostic.getSource()).append(" linha: ")
                             .append(diagnostic.getLineNumber()).append("\n")
-                            .append("----------------------------------------------------\n");
-            });
+                            .append("----------------------------------------------------\n"));
 
             throw new IllegalStateException(errorMessage.toString());
         }

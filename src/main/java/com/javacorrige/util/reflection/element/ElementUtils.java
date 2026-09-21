@@ -78,9 +78,11 @@ public class ElementUtils {
     }
 
     public static boolean checkTest(Object template, Object student) {
+        // Verificações básicas
         if (template == null || student == null) {
             return false;
         }
+
         if (AnnotationExtractor.getTest(template) == null) {
             return true;
         }
@@ -128,7 +130,7 @@ public class ElementUtils {
                     : matchingTemplateConstructor.newInstance(convertedTemplateConstructorParameters);
             Object studentInstance = Modifier.isStatic(studentMethod.getModifiers()) ? null
                     : matchingStudentConstructor.newInstance(convertedStudentConstructorParameters);
-            
+
             templateMethod.setAccessible(true);
             studentMethod.setAccessible(true);
 
@@ -199,7 +201,7 @@ public class ElementUtils {
             return result1.equals(result2);
         }
 
-        // Se for uma coleção 
+        // Se for uma coleção
         if (result1 instanceof Iterable && result2 instanceof Iterable) {
             return compareIterables((Iterable<?>) result1, (Iterable<?>) result2);
         }
@@ -266,14 +268,15 @@ public class ElementUtils {
         while (iter1.hasNext() && iter2.hasNext()) {
             Object item1 = iter1.next();
             Object item2 = iter2.next();
-            
+
             // Compara cada item da lista recursivamente
             if (!compareResults(item1, item2)) {
                 return false;
             }
         }
-        
-        // Retorna true apenas se ambos iteradores chegaram ao fim juntos (mesmo tamanho)
+
+        // Retorna true apenas se ambos iteradores chegaram ao fim juntos (mesmo
+        // tamanho)
         return !iter1.hasNext() && !iter2.hasNext();
     }
 
@@ -383,6 +386,7 @@ public class ElementUtils {
 
     private static String[] getMethodParametersTest(Method method) {
         try {
+            // Extrai a anotação do método 
             Annotation annotation = AnnotationExtractor.getTest(method);
             if (annotation == null) {
                 return new String[0];
@@ -568,12 +572,21 @@ public class ElementUtils {
     }
 
     /**
-     * Faz o parse do objeto e retorna uma instância do mesmo
+     * 
+     * @param objString
+     * @param expectedType
+     * @return
+     * @throws Exception
      */
-    private static Object instantiateObject(String objString, Class<?> expectedType) throws Exception {
+    private static Object instantiateObject(String objString, Class<?> expectedType)
+            throws InstantiationException, IllegalAccessException,
+            IllegalArgumentException, InvocationTargetException {
+
+        // Retorna o índice de onde o primeiro parentêses foi encontrado.
         int firstParen = objString.indexOf('(');
         String rawInnerParams = objString.substring(firstParen + 1, objString.length() - 1);
 
+        // Retorna um conjunto vazio ou os parâmetros separados por vírgula.
         String[] innerParams = rawInnerParams.isEmpty() ? new String[0] : rawInnerParams.split(",");
 
         // Busca o construtor que aceita essa quantidade de parâmetros
@@ -584,6 +597,7 @@ public class ElementUtils {
                     " aceita " + innerParams.length + " parâmetros.");
         }
 
+        // Deixa o construtor acessível caso ele seja privado
         matchingConstructor.setAccessible(true);
 
         Class<?>[] paramTypes = matchingConstructor.getParameterTypes();
@@ -595,5 +609,4 @@ public class ElementUtils {
 
         return matchingConstructor.newInstance(convertedInnerArgs);
     }
-
 }

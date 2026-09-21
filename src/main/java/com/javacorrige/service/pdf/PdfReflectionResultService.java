@@ -1,28 +1,38 @@
 package com.javacorrige.service.pdf;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.properties.TextAlignment;
+import com.itextpdf.layout.properties.UnitValue;
+import com.javacorrige.model.Student;
 import com.javacorrige.model.result.correction.ReflectionResult;
 import com.javacorrige.model.result.correction.exercise.ExerciseCorrection;
 import com.javacorrige.model.result.correction.exercise.clazz.ClassCorrection;
 
 public class PdfReflectionResultService {
+
+    private PdfReflectionResultService() {
+    }
+
     public static void addReflectionResult(Document document, ReflectionResult reflectionResult) {
         for (ExerciseCorrection exercise : reflectionResult.getExercises()) {
-
             if (exercise.getGrade() <= 0) {
                 continue;
             }
 
-            Paragraph stepTitle = new Paragraph("Exercício `" + exercise.getExerciseName() + "`:  ("
+            // Adiciona o nome do exercício
+            String title = "Exercício `" + exercise.getExerciseName() + "`:  ("
                     + String.format("%.2f", exercise.getObtainedGrade()) + "/"
-                    + String.format("%.2f", exercise.getGrade()) + ")")
-                    .setFontSize(16)
-                    .setBold()
-                    .setFontColor(ColorConstants.BLUE)
-                    .setMarginTop(10);
-            document.add(stepTitle);
+                    + String.format("%.2f", exercise.getGrade()) + ")";
+
+            addTitle(title, document);
 
             if (!exercise.getMissingClasses().isEmpty()) {
                 java.util.List<String> failedFileNames = reflectionResult
@@ -67,4 +77,83 @@ public class PdfReflectionResultService {
             }
         }
     }
+
+    public static void addReflectionResultGeneralReport(Document document,
+            List<Student> students) {
+        Table table = generateGeneralReportTable();
+        Set<String> exerciseNames = new HashSet<>();
+
+        for (Student student : students) {
+            StringBuilder correctedClassesBuilder = new StringBuilder();
+
+            for (ExerciseCorrection exercise : student.getReflectionResult().getExercises()) {
+                if (exercise.getGrade() > 0) {
+                    if (!exerciseNames.contains(exercise.getExerciseName())) {
+                        exerciseNames.add(exercise.getExerciseName());
+                    }
+
+                    for (ClassCorrection classCorrection : exercise.getCorrectedClasses()) {
+                        if (classCorrection.getGrade() > 0) {
+                            correctedClassesBuilder.append(" ")
+                                    .append(PdfClassCorrection.getSimpleClassCorrection(classCorrection));
+                        }
+                    }
+                }
+            }
+
+            addStudentToTable(table, correctedClassesBuilder.toString(), student);
+        }
+
+        StringBuilder exerciseName = new StringBuilder();
+        for (String name : exerciseNames) {
+            exerciseName.append(" ")
+                    .append(name);
+        }
+
+        addTitle(exerciseName.toString(), document);
+        document.add(table);
+    }
+
+    // Método auxiliar para criar as células da tabela
+    private static Cell createCell(String content) {
+        return new Cell()
+                .add(new Paragraph(content))
+                .setTextAlignment(TextAlignment.LEFT)
+                .setFontSize(6)
+                .setMarginBottom(5);
+    }
+
+    private static void addTitle(String title, Document document) {
+        Paragraph stepTitle = new Paragraph(title)
+                .setFontSize(14)
+                .setBold()
+                .setFontColor(ColorConstants.BLUE)
+                .setMarginTop(10);
+
+        document.add(stepTitle);
+    }
+
+    private static Table generateGeneralReportTable() {
+        Table table = new Table(UnitValue.createPercentArray(new float[] { 3, 2, 5 })).useAllAvailableWidth();
+
+        // Define o espaçamento acima da tabela
+        table.setMarginTop(20f);
+
+        // Adiciona o cabeçalho da tabela (em negrito)
+        table.addHeaderCell(new Cell().add(new Paragraph("Nome").setFontSize(8)).setBold());
+        table.addHeaderCell(new Cell().add(new Paragraph("Nota final").setFontSize(8)).setBold());
+        table.addHeaderCell(new Cell().add(new Paragraph("Notas por classe").setFontSize(8)).setBold());
+
+        return table;
+    }
+
+    private static void addStudentToTable(Table table, String correctedClasses, Student student) {
+        String finalGrade = student.getReflectionResult().getObtainedGrade() + "/"
+                + student.getReflectionResult().getGrade();
+
+        table.addCell(createCell(student.getName()));
+        table.addCell(createCell(finalGrade));
+        table.addCell(createCell(correctedClasses));
+    }
+
 }

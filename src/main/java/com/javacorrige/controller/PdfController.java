@@ -17,7 +17,14 @@ public class PdfController {
         this.pdfDirectory = pdfDirectory;
     }
 
-    public void start() {
+    /**
+     * Percorre a lista de estudantes e gera um relatório para cada um deles.
+     */
+    public void start(String templateDirectory) {
+        File generalReportFile = new File(pdfDirectory, "generalReport.pdf");
+
+        PdfService.generateGeneralReport(generalReportFile, students, templateDirectory);
+
         for (Student student : students) {
             String studentName = student.getName();
 
@@ -28,4 +35,3 @@ public class PdfController {
         }
     }
 }
-

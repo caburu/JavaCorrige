@@ -12,9 +12,14 @@ import java.util.function.Function;
 
 public class PdfTableService {
 
-    public static <T> void addTable(Document document, List<String> headers, List<T> data, List<Function<T, String>> valueExtractors) {
+    private PdfTableService() {
+    }
+
+    public static <T> void addTable(Document document, List<String> headers, List<T> data,
+            List<Function<T, String>> valueExtractors) {
         if (headers.size() != valueExtractors.size()) {
-            throw new IllegalArgumentException("O número de cabeçalhos deve corresponder ao número de funções de extração.");
+            throw new IllegalArgumentException(
+                    "O número de cabeçalhos deve corresponder ao número de funções de extração.");
         }
 
         // Cria a tabela com o número correto de colunas
@@ -22,15 +27,7 @@ public class PdfTableService {
         table.setWidth(document.getPdfDocument().getDefaultPageSize().getWidth() - 40); // Define a largura com margem
 
         // Adiciona cabeçalhos com formatação
-        for (String header : headers) {
-            Cell headerCell = new Cell()
-                    .add(new Paragraph(header))
-                    .setBold()
-                    .setBackgroundColor(ColorConstants.LIGHT_GRAY)
-                    .setPadding(5)
-                    .setTextAlignment(TextAlignment.CENTER);
-            table.addHeaderCell(headerCell);
-        }
+        addTableHeader(table, headers);
 
         // Adiciona dados
         for (T item : data) {
@@ -56,5 +53,23 @@ public class PdfTableService {
 
         // Adiciona a tabela ao documento
         document.add(table);
+    }
+
+    /**
+     * Adiciona um cabeçalho em uma tabela. 
+     * 
+     * @param table tabela que o cabeçalho deve ser adicionado 
+     * @param headers valores do cabeçalho 
+     */
+    private static void addTableHeader(Table table, List<String> headers) {
+        for (String header : headers) {
+            Cell headerCell = new Cell()
+                    .add(new Paragraph(header))
+                    .setBold()
+                    .setBackgroundColor(ColorConstants.LIGHT_GRAY)
+                    .setPadding(5)
+                    .setTextAlignment(TextAlignment.CENTER);
+            table.addHeaderCell(headerCell);
+        }
     }
 }

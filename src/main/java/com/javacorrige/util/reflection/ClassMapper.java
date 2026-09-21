@@ -21,7 +21,7 @@ public class ClassMapper {
             // Tenta encontrar a classe correspondente no estudante
             for (Class<?> studentClass : remainingStudentClasses) {
                 // Se houver compatibilidade (mesmo nome simples)
-                if (templateClass.isAssignableFrom(studentClass)) {
+                if (templateClass.getSimpleName().equals(studentClass.getSimpleName())) {
                     mappedClasses.put(templateClass, studentClass); // Mapeia a correspondência
                     remainingStudentClasses.remove(studentClass); // Remove a classe do estudante que já foi mapeada
                     matched = true;
