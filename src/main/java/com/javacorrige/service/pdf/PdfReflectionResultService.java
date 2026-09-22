@@ -1,9 +1,7 @@
 package com.javacorrige.service.pdf;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.itextpdf.kernel.colors.ColorConstants;
@@ -41,7 +39,7 @@ public class PdfReflectionResultService {
                         .getCompilationResult().getFailedFiles() != null
                                 ? reflectionResult.getCompilationResult().getFailedFiles().stream()
                                         .map(f -> f.getName().replace(".java", ""))
-                                        .collect(java.util.stream.Collectors.toList())
+                                        .toList()
                                 : new java.util.ArrayList<>();
 
                 java.util.List<String> trulyMissing = new java.util.ArrayList<>();
@@ -101,14 +99,15 @@ public class PdfReflectionResultService {
         document.add(table);
     }
 
-    /** 
+    /**
      * Retorna as classes de um estudante formatadas para o relatório geral.
      * 
      * @param student estudante que deseja obter as classes
      * @return classes formatadas
      */
     private static String formatCorrectedClasses(Student student) {
-        if (student.getCompilationResult().getFailedFiles() != null && !student.getCompilationResult().getFailedFiles().isEmpty()) {
+        if (student.getCompilationResult().getFailedFiles() != null
+                && !student.getCompilationResult().getFailedFiles().isEmpty()) {
             return "Erro ao compilar execícios!";
         }
 
@@ -137,7 +136,12 @@ public class PdfReflectionResultService {
                 .collect(Collectors.joining(", "));
     }
 
-    // Método auxiliar para criar as células da tabela
+    /**
+     * Cria uma célula na tabela
+     * 
+     * @param content conteúdo da célula
+     * @return nova célula
+     */
     private static Cell createCell(String content) {
         return new Cell()
                 .add(new Paragraph(content))
@@ -146,6 +150,12 @@ public class PdfReflectionResultService {
                 .setMarginBottom(5);
     }
 
+    /**
+     * Adiciona um novo título no documento
+     * 
+     * @param title    título do documento
+     * @param document documento em que o título é adicionado
+     */
     private static void addTitle(String title, Document document) {
         Paragraph stepTitle = new Paragraph(title)
                 .setFontSize(14)
@@ -156,6 +166,11 @@ public class PdfReflectionResultService {
         document.add(stepTitle);
     }
 
+    /**
+     * Gera a tabela para o relatório geral
+     * 
+     * @return tabela formatada para o relatório
+     */
     private static Table generateGeneralReportTable() {
         Table table = new Table(UnitValue.createPercentArray(new float[] { 3, 2, 5 })).useAllAvailableWidth();
 
@@ -170,6 +185,13 @@ public class PdfReflectionResultService {
         return table;
     }
 
+    /**
+     * Adiciona um estudante na tabela
+     * 
+     * @param table            tabela em que o estudante deve ser adicionado
+     * @param correctedClasses classes do estudante (corrigidas)
+     * @param student          estudante que deve ser adicionado na tabela
+     */
     private static void addStudentToTable(Table table, String correctedClasses, Student student) {
         String finalGrade = student.getReflectionResult().getObtainedGrade() + "/"
                 + student.getReflectionResult().getGrade();

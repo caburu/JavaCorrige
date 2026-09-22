@@ -34,5 +34,7 @@ public class AppController {
 
         PdfController pdfController = new PdfController(students, pdfDirectory);
         pdfController.start(templateDirectory + "/" + stepCorrection);
+
+        CSVController.startCSVController(students, pdfDirectory);
     }
 }
