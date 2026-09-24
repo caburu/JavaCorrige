@@ -18,6 +18,13 @@ public class CSVService {
     private CSVService() {
     }
 
+    /**
+     * Cuida da lógica responsável por gerar o arquivo csv contendo as notas dos
+     * alunos.
+     * 
+     * @param csvFile  Arquivo csv onde os dados devem ser inseridos
+     * @param students Lista de estudantes que devem ser inclusos no csv
+     */
     public static void generateCSV(File csvFile, List<Student> students) {
         try (FileWriter outputFile = new FileWriter(csvFile);
                 CSVWriter writer = new CSVWriter(outputFile)) {
@@ -36,6 +43,12 @@ public class CSVService {
         }
     }
 
+    /**
+     * Gera uma linha no CSV com os dados de um estudante
+     * 
+     * @param student
+     * @return Lista contendo uma array de strings
+     */
     private static List<String[]> buildStudentExerciseLines(Student student) {
         if (student == null || student.getReflectionResult() == null
                 || student.getReflectionResult().getExercises() == null) {

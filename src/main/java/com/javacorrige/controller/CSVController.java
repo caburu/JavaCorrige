@@ -10,6 +10,12 @@ public class CSVController {
     private CSVController() {
     }
 
+    /**
+     * Gera um arquivo csv contendo as notas finais dos estudantes no exercício corrigido.
+     * 
+     * @param students lista de estudantes que devem ser inclusos no csv 
+     * @param fileDirectory diretório onde o csv deve ser armazenado
+     */
     public static void startCSVController(List<Student> students, File fileDirectory) {
         File csvFile = new File(fileDirectory, "correcao.csv");
 
