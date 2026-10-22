@@ -16,7 +16,10 @@ public class FileService {
 
     // --- Métodos de Manipulação de Diretório ---
 
-    public static boolean createDirectory(File directory) {  
+    private FileService() {
+    }
+
+    public static boolean createDirectory(File directory) {
         return directory.mkdirs();
     }
 
@@ -49,14 +52,15 @@ public class FileService {
         // Lista as pastas em ordem alfanumérica
         File[] subDirectories = directory.listFiles(File::isDirectory);
         if (subDirectories == null || subDirectories.length == 0) {
-            throw new IllegalStateException("O diretório especificado não contém subpastas para organizar: " + directory.getPath());
+            throw new IllegalStateException(
+                    "O diretório especificado não contém subpastas para organizar: " + directory.getPath());
         }
-    
+
         Arrays.sort(subDirectories, (dir1, dir2) -> dir1.getName().compareToIgnoreCase(dir2.getName()));
-    
+
         List<File> selectedDirectories = new ArrayList<>();
         boolean found = false;
-    
+
         // Adiciona as pastas até encontrar o `stepCorrection`
         for (File subDirectory : subDirectories) {
             selectedDirectories.add(subDirectory);
@@ -65,40 +69,15 @@ public class FileService {
                 break;
             }
         }
-    
+
         if (!found) {
-            throw new IllegalArgumentException("A subpasta especificada como 'stepCorrection' não foi encontrada: " + stepCorrection);
+            throw new IllegalArgumentException(
+                    "A subpasta especificada como 'stepCorrection' não foi encontrada: " + stepCorrection);
         }
-    
+
         // Retorna apenas as pastas selecionadas
         return selectedDirectories.toArray(new File[0]);
     }
-
-    // public static void organizeStepDirectories(File directory, String stepCorrection) {    
-    //     // Lista as pastas em ordem alfanumérica
-    //     File[] subDirectories = directory.listFiles(File::isDirectory);
-    //     if (subDirectories == null || subDirectories.length == 0) {
-    //         throw new IllegalStateException("O diretório especificado não contém subpastas para organizar: " + directory.getPath());
-    //     }
-    
-    //     Arrays.sort(subDirectories, (dir1, dir2) -> dir1.getName().compareToIgnoreCase(dir2.getName()));
-    
-    //     boolean found = false;
-    
-    //     // Mantém apenas as pastas até encontrar o `stepCorrection`
-    //     for (File subDirectory : subDirectories) {
-    //         if (found) {
-    //             deleteDirectory(subDirectory); // Remove pastas após encontrar o stepCorrection
-    //         } else if (subDirectory.getName().equalsIgnoreCase(stepCorrection)) {
-    //             found = true;
-    //         }
-    //     }
-    
-    //     if (!found) {
-    //         throw new IllegalArgumentException("A subpasta especificada como 'stepCorrection' não foi encontrada: " + stepCorrection);
-    //     }
-    // }
-
 
     // --- Métodos de Manipulação de Arquivo ---
 
@@ -141,9 +120,11 @@ public class FileService {
         if (files != null) {
             for (File file : files) {
                 if (file.isDirectory()) {
-                    if (file.getName().equals("bin")) continue;
+                    if (file.getName().equals("bin"))
+                        continue;
                     javaFiles.addAll(getAllJavaFiles(file));
-                } else if (file.isFile() && file.getName().endsWith(".java")) {
+                } else if (file.isFile() && file.getName().endsWith(".java")
+                        && !file.getName().equals("__SHELL56.java")) {
                     javaFiles.add(file);
                 }
             }
@@ -157,7 +138,8 @@ public class FileService {
             File[] files = directory.listFiles();
             if (files != null) {
                 for (File file : files) {
-                    if (file.isDirectory() && file.getName().equals("bin")) continue;
+                    if (file.isDirectory() && file.getName().equals("bin"))
+                        continue;
                     if (file.isDirectory()) {
                         jarFiles.addAll(getAllJarFiles(file));
                     } else if (file.isFile() && file.getName().endsWith(".jar")) {
@@ -169,22 +151,24 @@ public class FileService {
         return jarFiles;
     }
 
-
     // Método generalizado para buscar arquivos com a extensão fornecida
     public static List<File> getFilesWithExtension(File directory, String extension) {
         List<File> filesWithExtension = new ArrayList<>();
-        
-        if (!FileValidator.isDirectory(directory)) return filesWithExtension;
+
+        if (!FileValidator.isDirectory(directory))
+            return filesWithExtension;
 
         File[] files = directory.listFiles();
         if (files != null) {
             for (File file : files) {
                 if (file.isDirectory()) {
                     // Ignorar a pasta "bin"
-                    if (file.getName().equals("bin")) continue;
+                    if (file.getName().equals("bin"))
+                        continue;
                     // Chama recursivamente para subdiretórios
                     filesWithExtension.addAll(getFilesWithExtension(file, extension));
-                } else if (file.isFile() && file.getName().endsWith(extension)) {
+                } else if (file.isFile() && file.getName().endsWith(extension)
+                        && !file.getName().contains("__SHELL56")) {
                     // Adiciona arquivo que tem a extensão especificada
                     filesWithExtension.add(file);
                 }
@@ -192,7 +176,6 @@ public class FileService {
         }
         return filesWithExtension;
     }
-
 
     private static void validateDirectoryPath(File directory) {
         if (!directory.exists() || !directory.isDirectory()) {
@@ -215,13 +198,13 @@ public class FileService {
     }
 
     public static File[] getDirectSubdirectories(File directory) {
-        return (directory != null && directory.isDirectory()) 
-                ? directory.listFiles(File::isDirectory) 
+        return (directory != null && directory.isDirectory())
+                ? directory.listFiles(File::isDirectory)
                 : new File[0];
     }
 
     public static void unpackAll(File directory) {
-        while(FileValidator.hasCompressedFile(directory)){
+        while (FileValidator.hasCompressedFile(directory)) {
             DirectoryUnpacker.unpackAll(directory);
         }
     }

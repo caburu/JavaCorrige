@@ -1,7 +1,6 @@
 package com.javacorrige.model.result.correction;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.javacorrige.model.result.compilation.CompilationResult;
 import com.javacorrige.model.result.correction.exercise.ExerciseCorrection;
@@ -29,8 +28,7 @@ public class ReflectionResult implements Correction {
     private List<ExerciseCorrection> initializeExercises(Template template, List<Class<?>> studentClasses,
             String targetClassName) {
         return template.getExercises().stream()
-                .map(exercise -> new ExerciseCorrection(exercise, studentClasses, targetClassName))
-                .collect(Collectors.toList());
+                .map(exercise -> new ExerciseCorrection(exercise, studentClasses, targetClassName)).toList();
     }
 
     public String getTemplateName() {

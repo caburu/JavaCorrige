@@ -12,7 +12,11 @@ import java.util.jar.JarEntry;
 
 public class ClassFileLoader {
 
-    public static List<Class<?>> loadClasses(File rootDirectory, List<File> compiledClassFiles, List<File> dependencyFiles) {
+    private ClassFileLoader() {
+    }
+
+    public static List<Class<?>> loadClasses(File rootDirectory, List<File> compiledClassFiles,
+            List<File> dependencyFiles) {
         List<Class<?>> classes = new ArrayList<>();
         List<URL> urls = new ArrayList<>();
 
@@ -30,7 +34,8 @@ public class ClassFileLoader {
             }
 
             // Criar o ClassLoader com todas as URLs
-            try (URLClassLoader classLoader = new URLClassLoader(urls.toArray(new URL[0]), ClassLoader.getSystemClassLoader())) {
+            try (URLClassLoader classLoader = new URLClassLoader(urls.toArray(new URL[0]),
+                    ClassLoader.getSystemClassLoader())) {
                 // Carregar as classes compiladas do diretório de saída
                 loadClassesFromFiles(compiledClassFiles, rootDirectory, classLoader, classes);
 
@@ -38,7 +43,8 @@ public class ClassFileLoader {
                 loadClassesFromJars(dependencyFiles, classLoader);
             }
         } catch (MalformedURLException e) {
-            throw new IllegalStateException("Erro ao criar o URLClassLoader. URL inválida para o diretório ou arquivos de dependência.", e);
+            throw new IllegalStateException(
+                    "Erro ao criar o URLClassLoader. URL inválida para o diretório ou arquivos de dependência.", e);
         } catch (IOException e) {
             throw new IllegalStateException("Erro ao manipular arquivos ou fechar o ClassLoader.", e);
         }
@@ -46,7 +52,8 @@ public class ClassFileLoader {
         return classes;
     }
 
-    private static void loadClassesFromFiles(List<File> compiledClassFiles, File rootDirectory, URLClassLoader classLoader, List<Class<?>> classes) {
+    private static void loadClassesFromFiles(List<File> compiledClassFiles, File rootDirectory,
+            URLClassLoader classLoader, List<Class<?>> classes) {
         for (File classFile : compiledClassFiles) {
             try {
                 String className = extractClassName(classFile, rootDirectory);
@@ -55,7 +62,8 @@ public class ClassFileLoader {
             } catch (ClassNotFoundException e) {
                 System.err.println("Classe não encontrada no arquivo: " + classFile.getAbsolutePath());
             } catch (NoClassDefFoundError e) {
-                System.err.println("Erro ao carregar definição da classe: " + classFile.getAbsolutePath() + " - " + e.getMessage());
+                System.err.println("Erro ao carregar definição da classe: " + classFile.getAbsolutePath() + " - "
+                        + e.getMessage());
             }
         }
     }
@@ -65,8 +73,8 @@ public class ClassFileLoader {
             if (jarFile.getName().endsWith(".jar")) {
                 try (JarFile jar = new JarFile(jarFile)) {
                     jar.stream()
-                        .filter(entry -> entry.getName().endsWith(".class")) // Filtra apenas as classes
-                        .forEach(entry -> loadClassFromJar(entry, classLoader));
+                            .filter(entry -> entry.getName().endsWith(".class")) // Filtra apenas as classes
+                            .forEach(entry -> loadClassFromJar(entry, classLoader));
                 } catch (IOException e) {
                     throw new IllegalStateException("Erro ao ler o arquivo JAR: " + jarFile.getAbsolutePath());
                 }
